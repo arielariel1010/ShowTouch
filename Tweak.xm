@@ -3,6 +3,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <SpringBoard/SpringBoard.h>
 #import <Foundation/Foundation.h>
+#import <version.h>
 
 #define kIdentifier @"com.lnx.showtouch"
 #define kSettingsChangedNotification (CFStringRef)@"com.lnx.showtouch/ReloadPrefs"
@@ -12,6 +13,10 @@
 
 #define kColorPath @"/var/mobile/Library/Preferences/com.lnx.showtouch.color.plist"
 #define kSettingsPath @"/var/mobile/Library/Preferences/com.lnx.showtouch.plist"
+
+@interface UIScreen ()
+@property (nonatomic) BOOL captured;
+@end
 
 @interface TouchWindow : UIWindow
 @property (nonatomic, strong) NSTimer *hideTimer;
@@ -25,7 +30,7 @@ static TouchWindow *touchWindow1;
 static TouchWindow *touchWindow2;
 static TouchWindow *touchWindow3;
 
-static CAShapeLayer *circleShape;
+//static CAShapeLayer *circleShape;
 static UIColor *touchColor;
 static NSInteger enabled;
 
@@ -48,7 +53,7 @@ static CGFloat touchSize;
       SBApplication *currentApplication = [[objc_getClass("SpringBoard") sharedApplication] _accessibilityFrontMostApplication];
 
       NSMutableArray *currentTouches;
-      if (@available(iOS 11.0, *)) {
+      if (IS_IOS_OR_NEWER(iOS_11_0)) {
         currentTouches = [[[self valueForKey:@"_allTouchesMutable"] allObjects] mutableCopy];
       } else {
         currentTouches = [[[self valueForKey:@"_touches"] allObjects] mutableCopy];
@@ -81,7 +86,7 @@ static CGFloat touchSize;
           UITouch *touch = currentTouches[i];
           NSLog(@"%@ - %@ - %@", currentApplication, [UIApplication sharedApplication], touch.window);
           BOOL shouldShowTouch = NO;
-          if (@available(iOS 11.0, *)) {
+          if (IS_IOS_OR_NEWER(iOS_11_0)) {
             NSLog(@"ios 11");
             shouldShowTouch = YES;
           }
@@ -193,8 +198,8 @@ static void reloadPrefs() {
   NSLog(@"ios 11");
 
   if (enabled == 2) {
-    if (@available(iOS 11.0, *)) {
-        [[NSNotificationCenter defaultCenter] addObserverForName: UIScreenCapturedDidChangeNotification
+    if (IS_IOS_OR_NEWER(iOS_11_0)) {
+        [[NSNotificationCenter defaultCenter] addObserverForName:@"UIScreenCapturedDidChangeNotification"
             object: nil
             queue: nil
             usingBlock: ^ (NSNotification * notification) {
